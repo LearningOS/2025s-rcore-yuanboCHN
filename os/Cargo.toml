@@ -10,5 +10,6 @@ edition = "2021"
 buddy_system_allocator = "0.6"
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 log = "0.4"
-riscv = { git = "https://gitee.com/rcore-os/riscv", features = ["inline-asm"] }
+riscv = { version = "0.10", features = ["inline-asm"] }
+virtio-drivers = { version = "0.3", features = ["legacy"] }
 

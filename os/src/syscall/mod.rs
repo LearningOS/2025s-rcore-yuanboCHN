@@ -26,15 +26,24 @@ mod process;
 
 use fs::*;
 use process::*;
+use crate::task::TASK_MANAGER;  // 导入全局实例
+
 
 /// handle syscall exception with `syscall_id` and other arguments
 pub fn syscall(syscall_id: usize, args: [usize; 3]) -> isize {
+    if syscall_id != SYSCALL_TRACE {
+        let mut inner = TASK_MANAGER.inner.exclusive_access();
+        let current_idx = inner.current_task;
+        let task = &mut inner.tasks[current_idx];
+        task.syscall_counts[syscall_id] += 1;
+    }
     match syscall_id {
+        SYSCALL_TRACE => sys_trace(args[0], args[1], args[2]),
         SYSCALL_WRITE => sys_write(args[0], args[1] as *const u8, args[2]),
         SYSCALL_EXIT => sys_exit(args[0] as i32),
         SYSCALL_YIELD => sys_yield(),
         SYSCALL_GET_TIME => sys_get_time(args[0] as *mut TimeVal, args[1]),
-        SYSCALL_TRACE => sys_trace(args[0], args[1], args[2]),
+        
         _ => panic!("Unsupported syscall_id: {}", syscall_id),
     }
 }
